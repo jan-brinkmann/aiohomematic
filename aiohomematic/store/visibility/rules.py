@@ -73,6 +73,7 @@ RELEVANT_MASTER_PARAMSETS_BY_DEVICE: Final[Mapping[ModelName, tuple[frozenset[Ch
     "HmIP-FCI6": (frozenset(range(1, 7)), frozenset({Parameter.CHANNEL_OPERATION_MODE})),
     "HmIP-FSI16": (frozenset({1}), frozenset({Parameter.CHANNEL_OPERATION_MODE})),
     "HmIP-FSI6": (frozenset({1}), frozenset({Parameter.CHANNEL_OPERATION_MODE})),
+    "HmIP-HAP JS1": (frozenset({0}), frozenset({Parameter.SIGNAL_BRIGHTNESS})),
     "HmIP-HEATING": (frozenset({1}), CLIMATE_MASTER_PARAMETERS),
     "HmIP-MIO16-PCB": (frozenset({13, 14, 15, 16}), frozenset({Parameter.CHANNEL_OPERATION_MODE})),
     "HmIP-MOD-RC8": (frozenset(range(1, 9)), frozenset({Parameter.CHANNEL_OPERATION_MODE})),

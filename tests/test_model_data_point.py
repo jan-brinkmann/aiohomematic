@@ -35,7 +35,8 @@ class TestDataPointDefinition:
     def test_custom_required_data_points(self) -> None:
         """Test required parameters from data point definitions."""
         required_parameters = get_required_parameters()
-        assert len(required_parameters) == 115
+        assert len(required_parameters) == 116
+        assert "SIGNAL_BRIGHTNESS" in required_parameters
         assert check_ignore_parameters_is_clean() is True
 
 
