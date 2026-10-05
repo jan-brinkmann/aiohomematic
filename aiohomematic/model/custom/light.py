@@ -6,12 +6,23 @@ Custom light data points for dimmers and colored lighting.
 Public API of this module is defined by __all__.
 """
 
+from __future__ import annotations
+
 from collections.abc import Mapping
 from enum import StrEnum, unique
 import math
 from typing import ClassVar, Final, TypedDict, Unpack, override
 
-from aiohomematic.const import DataPointCategory, DataPointUsage, DeviceProfile, Field, Parameter
+from aiohomematic.const import (
+    CallSource,
+    DataPointCategory,
+    DataPointUsage,
+    DeviceProfile,
+    Field,
+    Parameter,
+    ParamsetKey,
+)
+from aiohomematic.decorators import inspector
 from aiohomematic.interfaces.custom import LightDataPointProtocol
 from aiohomematic.model.combined.field import CombinedHsColorField, CombinedTimerField
 from aiohomematic.model.custom.capabilities.light import LightCapabilities
@@ -215,6 +226,72 @@ class SoundPlayerLedOnArgs(LightOnArgs, total=False):
 
     repetitions: int  # 0=none, 1-18=count, -1=infinite (converted to VALUE_LIST entry)
     flash_time: int  # Flash duration in milliseconds (converted to nearest VALUE_LIST entry)
+
+
+class CustomDpSystemButtonLight(CustomDataPoint):
+    """On/off control of the HmIP-HAP JS1 system button illumination."""
+
+    __slots__ = ()
+
+    _category = DataPointCategory.LIGHT
+    _dp_signal_brightness: Final = DataPointField(field=Field.SIGNAL_BRIGHTNESS, dpt=DpFloat)
+    _validity_relevant_fields: ClassVar[frozenset[Field]] = frozenset({Field.SIGNAL_BRIGHTNESS})
+
+    @property
+    @override
+    def data_point_name_postfix(self) -> str:
+        """Return the parameter used to name the system button illumination."""
+        return Parameter.SIGNAL_BRIGHTNESS
+
+    @property
+    @override
+    def has_data_points(self) -> bool:
+        """Require the supported maintenance channel and a writable MASTER float."""
+        # Registry model matching includes prefixes. This profile deliberately
+        # supports only JS1, and must never bind a same-named VALUES parameter.
+        return (
+            self._device.model.lower() == "hmip-hap js1"
+            and self._channel.no == 0
+            and self._channel.type_name == "MAINTENANCE"
+            and isinstance(dp := self._data_points.get(Field.SIGNAL_BRIGHTNESS), DpFloat)
+            and dp.paramset_key == ParamsetKey.MASTER
+            and dp.is_readable
+            and dp.is_writable
+        )
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return whether a valid system button brightness is above zero."""
+        if not self._dp_signal_brightness.is_valid or (value := self._dp_signal_brightness.value) is None:
+            return None
+        return value > 0.0
+
+    @inspector
+    async def turn_off(self) -> None:
+        """Disable the system button illumination."""
+        await self._set_signal_brightness(value=0.0)
+
+    @inspector
+    async def turn_on(self) -> None:
+        """Enable the system button illumination at its full setting."""
+        await self._set_signal_brightness(value=1.0)
+
+    async def _set_signal_brightness(self, *, value: float) -> None:
+        """Write a changed MASTER value and refresh it through the existing cache."""
+        dp = self._dp_signal_brightness
+        if dp.is_valid and not dp.state_uncertain and not dp.is_optimistic and dp.value == value:
+            return
+        # MASTER has no direct VALUES callback. Avoid optimistic send_value(),
+        # whose confirmation timeout could roll an accepted write back locally.
+        if not await self._client.put_paramset(
+            channel_address=self._channel.address,
+            paramset_key_or_link_address=ParamsetKey.MASTER,
+            values={Parameter.SIGNAL_BRIGHTNESS: value},
+            wait_for_callback=None,
+        ):
+            # The client logs failed/superseded commands and returns no sent keys.
+            return
+        await dp.load_data_point_value(call_source=CallSource.MANUAL_OR_SCHEDULED, direct_call=True)
 
 
 class CustomDpDimmer(StateChangeTimerMixin, BrightnessMixin, CustomDataPoint, LightDataPointProtocol):
@@ -939,6 +1016,14 @@ class CustomDpSoundPlayerLed(CustomDpDimmer):
 # =============================================================================
 # DeviceProfileRegistry Registration
 # =============================================================================
+
+DeviceProfileRegistry.register(
+    category=DataPointCategory.LIGHT,
+    models="HmIP-HAP JS1",
+    data_point_class=CustomDpSystemButtonLight,
+    profile_type=DeviceProfile.IP_SYSTEM_BUTTON_LIGHT,
+    channels=(0,),
+)
 
 # Data-driven RF Dimmer registrations: (models, channels or None)
 _RF_DIMMER_REGISTRATIONS: Final[tuple[tuple[str | tuple[str, ...], tuple[int, ...] | None], ...]] = (

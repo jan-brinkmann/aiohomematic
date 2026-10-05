@@ -1,3 +1,15 @@
+# Unreleased
+
+## What's Changed
+
+### Added
+
+- HmIP-HAP JS1 channel 0 system button illumination as a pure on/off custom
+  light using MASTER `SIGNAL_BRIGHTNESS`. Commands select exactly 1.0 or 0.0;
+  positive intermediate settings report ON and remain editable through device
+  configuration. Confirmed endpoint values skip redundant writes. See `UPDATE.md`
+  for architecture, synchronization and release considerations.
+
 # Version 2026.10.2 (2026-10-02)
 
 ## What's Changed

@@ -95,6 +95,9 @@ EXPECTED_CATEGORY_PROTOCOLS: dict[str, frozenset[type]] = {
     "CustomDpSoundPlayer": frozenset({SoundPlayerDataPointProtocol}),
     "CustomDpSoundPlayerLed": frozenset({LightDataPointProtocol}),
     "CustomDpSwitch": frozenset(),
+    # LightDataPointProtocol includes the dimmer/color API. This on/off-only
+    # data point deliberately has no brightness or color surface.
+    "CustomDpSystemButtonLight": frozenset(),
     "CustomDpTextDisplay": frozenset(),
     "CustomDpWindowDrive": frozenset({CoverDataPointProtocol}),
 }

@@ -54,6 +54,7 @@ EXPECTED_VALIDITY_RELEVANT_FIELDS: dict[str, frozenset[Field]] = {
     "CustomDpSoundPlayer": frozenset({Field.DIRECTION}),
     "CustomDpSoundPlayerLed": frozenset({Field.LEVEL}),
     "CustomDpSwitch": frozenset({Field.STATE}),
+    "CustomDpSystemButtonLight": frozenset({Field.SIGNAL_BRIGHTNESS}),
     "CustomDpTextDisplay": frozenset(),
     "CustomDpWindowDrive": frozenset({Field.LEVEL}),
 }

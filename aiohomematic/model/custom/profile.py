@@ -360,6 +360,14 @@ IP_GARAGE_CONFIG: Final = ProfileConfig(
 
 # --- Dimmer/Light Profiles ---
 
+IP_SYSTEM_BUTTON_LIGHT_CONFIG: Final = ProfileConfig(
+    profile_type=DeviceProfile.IP_SYSTEM_BUTTON_LIGHT,
+    channel_group=ChannelGroupConfig(
+        allow_undefined_generic_data_points=True,
+        fields={Field.SIGNAL_BRIGHTNESS: _hidden(parameter=Parameter.SIGNAL_BRIGHTNESS)},
+    ),
+)
+
 IP_DIMMER_CONFIG: Final = ProfileConfig(
     profile_type=DeviceProfile.IP_DIMMER,
     channel_group=ChannelGroupConfig(
@@ -948,6 +956,7 @@ PROFILE_CONFIGS: Final[ProfileRegistry] = {
     DeviceProfile.IP_RGBW_LIGHT: IP_RGBW_LIGHT_CONFIG,
     DeviceProfile.IP_SIMPLE_FIXED_COLOR_LIGHT: IP_SIMPLE_FIXED_COLOR_LIGHT_CONFIG,
     DeviceProfile.IP_SIMPLE_FIXED_COLOR_LIGHT_WIRED: IP_SIMPLE_FIXED_COLOR_LIGHT_WIRED_CONFIG,
+    DeviceProfile.IP_SYSTEM_BUTTON_LIGHT: IP_SYSTEM_BUTTON_LIGHT_CONFIG,
     DeviceProfile.RF_DIMMER: RF_DIMMER_CONFIG,
     DeviceProfile.RF_DIMMER_COLOR: RF_DIMMER_COLOR_CONFIG,
     DeviceProfile.RF_DIMMER_COLOR_FIXED: RF_DIMMER_COLOR_FIXED_CONFIG,
